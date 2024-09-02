@@ -478,12 +478,14 @@ st.sidebar.markdown(
     <style>
     .sidebar {{
         width: auto;
+        text-align:center;
     }}
     .sidebar-content {{
         display: flex;
         flex-direction: column;
         height: 100%;
         margin-top: 10px;
+        text-align:center;
     }}
     .icon-container {{
         display: flex;
