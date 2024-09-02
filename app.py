@@ -153,9 +153,8 @@ st.markdown(hide_fullscreen_button, unsafe_allow_html=True)
 center_image_css = """
     <style>
     div[data-testid="stImage"] {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
+        display: flex;
+        justify-content: center;
     }
     </style>
     """
