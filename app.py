@@ -403,7 +403,7 @@ if shotmap_data is not None:
     #ax_info.text(0.1, 0.12, f"{str(minutes_played)} dakika", size=12, ha="center", fontproperties=prop, color=primary_text_color)
     
     ax_shotmap.text(0.148, 1.055, str(player_name), transform=ax_shotmap.transAxes, size=21, ha="left", fontproperties=bold_prop, weight='bold', color='white')
-    ax_shotmap.text(0.148, 1.015, str(league_season_string), transform=ax_shotmap.transAxes, size=12, ha="left", fontproperties=prop, weight='normal', color='white')
+    ax_shotmap.text(0.148, 1.015, str(league_season_string), transform=ax_shotmap.transAxes, size=12, ha="left", fontproperties=prop, weight='normal', color=primary_text_color)
     
     # Örnek oyuncu bilgileri
     data = [["Maç", matches_played],
