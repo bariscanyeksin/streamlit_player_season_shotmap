@@ -449,7 +449,7 @@ if shotmap_data is not None:
     file_name = f"{player_name_replaced}_{league_string}_{season_string}_Şut_Haritası.png"
     
     st.download_button(
-        label="Grafiği İndir",
+        label="Download",
         data=buf,
         file_name=file_name,
         mime="image/png"
