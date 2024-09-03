@@ -107,8 +107,6 @@ st.markdown(
 # Sidebar'a görsel ekleme
 image_url = "https://images.fotmob.com/image_resources/logo/leaguelogo/71.png"  # Görselin URL'si
 
-st.sidebar.image(image_url, width=100)
-
 # CSS ile fullscreen butonunu gizleme
 hide_fullscreen_button = """
     <style>
@@ -129,6 +127,8 @@ center_image_css = """
     </style>
     """
 st.markdown(center_image_css, unsafe_allow_html=True)
+
+st.sidebar.image(image_url, width=100)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
