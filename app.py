@@ -136,6 +136,32 @@ ax_shotmap.axis('off')
 primary_text_color = '#818f86'
 pitch_color = '#0e1117'
 
+# Sidebar'a görsel ekleme
+image_url = "https://images.fotmob.com/image_resources/logo/leaguelogo/71.png"  # Görselin URL'si
+
+# CSS ile fullscreen butonunu gizleme
+hide_fullscreen_button = """
+    <style>
+    button[title="View fullscreen"] {
+        display: none;
+    }
+    </style>
+    """
+st.markdown(hide_fullscreen_button, unsafe_allow_html=True)
+
+# CSS ile görseli ortalama
+center_image_css = """
+    <style>
+    div[data-testid="stImage"] {
+        display: flex;
+        justify-content: center;
+    }
+    </style>
+    """
+st.markdown(center_image_css, unsafe_allow_html=True)
+
+st.sidebar.image(image_url, width=100)
+
 # API'den veri çekme
 url = "https://www.fotmob.com/api/leagueseasondeepstats?id=71&season=23864&type=players&stat=total_scoring_att&slug=super-lig"
 response = requests.get(url)
