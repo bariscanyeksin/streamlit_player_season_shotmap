@@ -18,7 +18,7 @@ from matplotlib.transforms import Bbox
 matplotlib.rcParams["figure.dpi"] = 300
 
 st.set_page_config(
-    page_title="Süper Lig - Oyuncu Şut Haritası",
+    page_title="Süper Lig - Oyuncu Sezon Şut Haritası",
     initial_sidebar_state="expanded"
 )
 
