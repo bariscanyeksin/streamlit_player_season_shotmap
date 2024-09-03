@@ -109,16 +109,6 @@ image_url = "https://images.fotmob.com/image_resources/logo/leaguelogo/71.png"  
 
 st.sidebar.image(image_url, width=100)
 
-# CSS ile fullscreen butonunu gizleme
-hide_fullscreen_button = """
-    <style>
-    button[title="View fullscreen"] {
-        display: none;
-    }
-    </style>
-    """
-st.sidebar.markdown(hide_fullscreen_button, unsafe_allow_html=True)
-
 # CSS ile görseli ortalama
 center_image_css = """
     <style>
@@ -129,6 +119,16 @@ center_image_css = """
     </style>
     """
 st.sidebar.markdown(center_image_css, unsafe_allow_html=True)
+
+# CSS ile fullscreen butonunu gizleme
+hide_fullscreen_button = """
+    <style>
+    button[title="View fullscreen"] {
+        display: none;
+    }
+    </style>
+    """
+st.sidebar.markdown(hide_fullscreen_button, unsafe_allow_html=True)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
