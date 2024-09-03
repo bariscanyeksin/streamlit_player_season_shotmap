@@ -139,16 +139,6 @@ pitch_color = '#0e1117'
 # Sidebar'a görsel ekleme
 image_url = "https://images.fotmob.com/image_resources/logo/leaguelogo/71.png"  # Görselin URL'si
 
-# CSS ile fullscreen butonunu gizleme
-hide_fullscreen_button = """
-    <style>
-    button[title="View fullscreen"] {
-        display: none;
-    }
-    </style>
-    """
-st.markdown(hide_fullscreen_button, unsafe_allow_html=True)
-
 # CSS ile görseli ortalama
 center_image_css = """
     <style>
