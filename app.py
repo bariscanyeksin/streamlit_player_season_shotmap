@@ -159,9 +159,69 @@ ax_shotmap.axis('off')
 primary_text_color = '#818f86'
 pitch_color = '#0e1117'
 
+def headers_total_shots():
+    headers = {
+        'accept': '*/*',
+        'accept-language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
+        'cache-control': 'no-cache',
+        'pragma': 'no-cache',
+        'priority': 'u=1, i',
+        'referer': 'https://www.fotmob.com/en-GB/leagues/71/stats/season/23864/players/total_scoring_att',
+        'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        'x-mas': 'eyJib2R5Ijp7InVybCI6Ii9hcGkvbGVhZ3Vlc2Vhc29uZGVlcHN0YXRzP2xuZz1lbi1HQiZpZD03MSZzZWFzb249MjM4NjQmdHlwZT1wbGF5ZXJzJnN0YXQ9dG90YWxfc2NvcmluZ19hdHQiLCJjb2RlIjoxNzMzMjI2NTg0NzQ3LCJmb28iOiI4OTA1MDIwZDcifSwic2lnbmF0dXJlIjoiNURENEQzOEM5NUZCNTNCMUFEOURDMzIxOTA4MjlEMTIifQ==',
+    }
+    
+    return headers
+
+def headers_player_stats(player_id):
+    headers = {
+        'accept': '*/*',
+        'accept-language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
+        'cache-control': 'no-cache',
+        'pragma': 'no-cache',
+        'priority': 'u=1, i',
+        'referer': f'https://www.fotmob.com/en-GB/players/{player_id}/',
+        'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        'x-mas': 'eyJib2R5Ijp7InVybCI6Ii9hcGkvcGxheWVyU3RhdHM/cGxheWVySWQ9MTA5MjAxNSZzZWFzb25JZD0xLTAmaXNGaXJzdFNlYXNvbj1mYWxzZSIsImNvZGUiOjE3MzMyMjY2NDM5NDgsImZvbyI6IjRiZDAyNjg5OCJ9LCJzaWduYXR1cmUiOiJGOUVGMjFENDVDMkRDQURGRDBCMjRFQkI0REYxMjNBQiJ9',
+    }
+    
+    return headers
+
+def headers_player_data(player_id):
+    headers = {
+        'accept': '*/*',
+        'accept-language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
+        'cache-control': 'no-cache',
+        'pragma': 'no-cache',
+        'priority': 'u=1, i',
+        'referer': f'https://www.fotmob.com/en-GB/players/{player_id}/',
+        'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        'x-mas': 'eyJib2R5Ijp7InVybCI6Ii9hcGkvcGxheWVyRGF0YT9pZD0xMDkyMDE1IiwiY29kZSI6MTczMzIyNDA3NjgxOSwiZm9vIjoiNGJkMDI2ODk4In0sInNpZ25hdHVyZSI6IkFFMDUwMEY0NTY1MTU2OUUwQjJBNDlENjdGM0ZBQkI4In0=',
+    }
+    
+    return headers
+    
 # API'den veri çekme
 url = "https://www.fotmob.com/api/leagueseasondeepstats?id=71&season=23864&type=players&stat=total_scoring_att&slug=super-lig"
-response = requests.get(url)
+response = requests.get(url, headers=headers_total_shots())
 data = response.json()
 
 # Gerekli bilgileri işleme
@@ -189,7 +249,7 @@ season_string = "2024-2025"
 
 def get_team_data(team_id):
     team_data_url = f"https://www.fotmob.com/api/teams?id={team_id}"
-    team_data_response = requests.get(team_data_url)
+    team_data_response = requests.get(team_data_url, headers=headers_player_data(player_id))
     team_data = team_data_response.json()
     return team_data
 
@@ -204,7 +264,7 @@ def get_entry_id_for_selected_player(player_id):
     """
     # Seçilen oyuncunun sezon bilgilerini API'den çekme
     player_data_url = f"https://www.fotmob.com/api/playerData?id={player_id}"
-    player_data_response = requests.get(player_data_url)
+    player_data_response = requests.get(player_data_url, headers=headers_player_data(player_id))
     player_data = player_data_response.json()
 
     # 2024/2025 Süper Lig sezonuna ait entryId'yi bulma
@@ -225,7 +285,7 @@ def get_shotmap_data(player_id, entry_id):
     Seçilen oyuncunun şut haritası verilerini API'den çeker.
     """
     shotmap_url = f"https://www.fotmob.com/api/playerStats?playerId={player_id}&seasonId={entry_id}"
-    shotmap_response = requests.get(shotmap_url)
+    shotmap_response = requests.get(shotmap_url, headers=headers_player_stats(player_id))
     shotmap_data = shotmap_response.json()
     shotmap = shotmap_data.get("shotmap", [])
     if shotmap is not None: 
@@ -238,7 +298,7 @@ def get_player_shooting_stats(player_id, season_id):
     Seçilen oyuncunun sezon performansındaki 'Shooting' istatistiklerini API'den çeker.
     """
     url = f"https://www.fotmob.com/api/playerStats?playerId={player_id}&seasonId={season_id}"
-    response = requests.get(url)
+    response = requests.get(url, headers=headers_player_stats(player_id))
     data = response.json()
     
     # Stats section içerisindeki 'Shooting' başlığı altındaki verileri al
@@ -264,7 +324,7 @@ def get_player_match_played_stats(player_id, season_id):
     Seçilen oyuncunun sezon performansındaki 'Matches', 'Started', 'Minutes' istatistiklerini API'den çeker.
     """
     url = f"https://www.fotmob.com/api/playerStats?playerId={player_id}&seasonId={season_id}"
-    response = requests.get(url)
+    response = requests.get(url, headers=headers_player_stats(player_id))
     data = response.json()
 
     # Stats section içerisindeki verileri al
@@ -290,8 +350,9 @@ matches_played = player_match_stats["Matches"]
 started_in_11 = player_match_stats["Started"]
 minutes_played = player_match_stats["Minutes"]
 
-if shotmap_data is not None:
+if shotmap_data is not None and player_shooting_stats is not None and player_match_stats is not None:
     # 'Goals' başlığını arayarak gol sayısını çekme
+    print(player_shooting_stats)
     goal_stat = next((item for item in player_shooting_stats if item["title"] == "Goals"), None)
     goal_count = goal_stat["statValue"] if goal_stat else '-'
 
@@ -358,7 +419,7 @@ if shotmap_data is not None:
                 
     # Oyuncu görselini URL'den çekme
     url = f'https://images.fotmob.com/image_resources/playerimages/{player_id}.png'
-    response = requests.get(url)
+    response = requests.get(url, headers=headers_player_data(player_id))
     img = mpimg.imread(BytesIO(response.content))
 
     # Görseli ekleme
@@ -367,7 +428,7 @@ if shotmap_data is not None:
     ax_shotmap.add_artist(ab)
     
     url_teamlogo = f'https://images.fotmob.com/image_resources/logo/teamlogo/{team_id}.png'
-    response_teamlogo = requests.get(url_teamlogo)
+    response_teamlogo = requests.get(url_teamlogo, headers=headers_player_data(player_id))
     img_teamlogo = mpimg.imread(BytesIO(response_teamlogo.content))
 
     # Görseli ekleme
