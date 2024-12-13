@@ -522,13 +522,15 @@ if shotmap_data is not None and player_shooting_stats is not None and player_mat
                 
     # Oyuncu görselini URL'den çekme
     player_img_url = f'https://images.fotmob.com/image_resources/playerimages/{player_id}.png'
-    response = requests.get(player_img_url, headers=headers_for_images())
-    img = mpimg.imread(BytesIO(response.content))
+    player_img_response = requests.get(player_img_url, headers=headers_for_images())
+    player_img_content_type = player_img_response.headers.get('Content-Type', '')
+    if 'image/png' in player_img_content_type:
+        player_img = mpimg.imread(BytesIO(player_img_response.content))
 
-    # Görseli ekleme
-    imagebox = OffsetImage(img, zoom=0.3)
-    ab = AnnotationBbox(imagebox, (0.05, 1.1), frameon=False, xycoords='axes fraction', box_alignment=(0, 1))
-    ax_shotmap.add_artist(ab)
+        # Görseli ekleme
+        imagebox = OffsetImage(player_img, zoom=0.3)
+        ab = AnnotationBbox(imagebox, (0.05, 1.1), frameon=False, xycoords='axes fraction', box_alignment=(0, 1))
+        ax_shotmap.add_artist(ab)
     
     url_teamlogo = f'https://images.fotmob.com/image_resources/logo/teamlogo/{team_id}.png'
     response_teamlogo = requests.get(url_teamlogo, headers=headers_for_images())
