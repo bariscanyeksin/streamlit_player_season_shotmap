@@ -8,12 +8,15 @@ import matplotlib.image as mpimg
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from io import BytesIO
 from matplotlib.colors import to_rgba
-import pandas as pd
 import matplotlib
 import matplotlib.gridspec as gridspec
 import io
 import base64
 from matplotlib.transforms import Bbox
+import json
+import hashlib
+from bs4 import BeautifulSoup
+from datetime import datetime
 
 matplotlib.rcParams["figure.dpi"] = 300
 
@@ -159,14 +162,78 @@ ax_shotmap.axis('off')
 primary_text_color = '#818f86'
 pitch_color = '#0e1117'
 
-def headers_total_shots():
+def get_version_number():
+    headers = {
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'accept-language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
+        'cache-control': 'no-cache',
+        'pragma': 'no-cache',
+        'priority': 'u=0, i',
+        'referer': 'https://www.google.com/',
+        'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'document',
+        'sec-fetch-mode': 'navigate',
+        'sec-fetch-site': 'same-origin',
+        'sec-fetch-user': '?1',
+        'upgrade-insecure-requests': '1',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    }
+    
+    response = requests.get("https://www.fotmob.com/", headers=headers)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    version_element = soup.find('span', class_=lambda cls: cls and 'VersionNumber' in cls)
+    if version_element:
+        return version_element.text.strip()
+    else:
+        return None
+    
+version_number = get_version_number()
+
+def get_xmas_pass():
+    url = 'https://raw.githubusercontent.com/bariscanyeksin/streamlit_radar/refs/heads/main/xmas_pass.txt'
+    response = requests.get(url)
+    if response.status_code == 200:
+        file_content = response.text
+        return file_content
+    else:
+        print(f"Failed to fetch the file: {response.status_code}")
+        return None
+    
+xmas_pass = get_xmas_pass()
+
+def create_xmas_header(url, password):
+        try:
+            timestamp = int(datetime.now().timestamp() * 1000)
+            request_data = {
+                "url": url,
+                "code": timestamp,
+                "foo": version_number
+            }
+            
+            json_string = f"{json.dumps(request_data, separators=(',', ':'))}{password.strip()}"
+            signature = hashlib.md5(json_string.encode('utf-8')).hexdigest().upper()
+            body = {
+                "body": request_data,
+                "signature": signature
+            }
+            encoded = base64.b64encode(json.dumps(body, separators=(',', ':')).encode('utf-8')).decode('utf-8')
+            return encoded
+        except Exception as e:
+            return f"Error generating signature: {e}"
+
+def headers_total_shots(league_id, season_id):
+    api_url = f"/api/leagueseasondeepstats?id={league_id}&season={season_id}&type=players&stat=total_scoring_att"
+    xmas_value = create_xmas_header(api_url, xmas_pass)
+        
     headers = {
         'accept': '*/*',
         'accept-language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
         'cache-control': 'no-cache',
         'pragma': 'no-cache',
         'priority': 'u=1, i',
-        'referer': 'https://www.fotmob.com/en-GB/leagues/71/stats/season/23864/players/total_scoring_att',
+        'referer': f'https://www.fotmob.com/en-GB/leagues/{league_id}/stats/season/{season_id}/players/total_scoring_att',
         'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
         'sec-ch-ua-mobile': '?0',
         'sec-ch-ua-platform': '"Windows"',
@@ -174,12 +241,13 @@ def headers_total_shots():
         'sec-fetch-mode': 'cors',
         'sec-fetch-site': 'same-origin',
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-        'x-mas': 'eyJib2R5Ijp7InVybCI6Ii9hcGkvbGVhZ3Vlc2Vhc29uZGVlcHN0YXRzP2xuZz1lbi1HQiZpZD03MSZzZWFzb249MjM4NjQmdHlwZT1wbGF5ZXJzJnN0YXQ9dG90YWxfc2NvcmluZ19hdHQiLCJjb2RlIjoxNzMzMjI2NTg0NzQ3LCJmb28iOiI4OTA1MDIwZDcifSwic2lnbmF0dXJlIjoiNURENEQzOEM5NUZCNTNCMUFEOURDMzIxOTA4MjlEMTIifQ==',
+        'x-mas': f'{xmas_value}',
     }
     
     return headers
 
-def headers_player_stats(player_id):
+def headers_player_stats(player_id, api_url):
+    xmas_value = create_xmas_header(api_url, xmas_pass)
     headers = {
         'accept': '*/*',
         'accept-language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
@@ -194,12 +262,13 @@ def headers_player_stats(player_id):
         'sec-fetch-mode': 'cors',
         'sec-fetch-site': 'same-origin',
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-        'x-mas': 'eyJib2R5Ijp7InVybCI6Ii9hcGkvcGxheWVyU3RhdHM/cGxheWVySWQ9MTA5MjAxNSZzZWFzb25JZD0xLTAmaXNGaXJzdFNlYXNvbj1mYWxzZSIsImNvZGUiOjE3MzMyMjY2NDM5NDgsImZvbyI6IjRiZDAyNjg5OCJ9LCJzaWduYXR1cmUiOiJGOUVGMjFENDVDMkRDQURGRDBCMjRFQkI0REYxMjNBQiJ9',
+        'x-mas': f'{xmas_value}',
     }
     
     return headers
 
-def headers_player_data(player_id):
+def headers_player_data(player_id, api_url):
+    xmas_value = create_xmas_header(api_url, xmas_pass)
     headers = {
         'accept': '*/*',
         'accept-language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
@@ -214,14 +283,58 @@ def headers_player_data(player_id):
         'sec-fetch-mode': 'cors',
         'sec-fetch-site': 'same-origin',
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-        'x-mas': 'eyJib2R5Ijp7InVybCI6Ii9hcGkvcGxheWVyRGF0YT9pZD0xMDkyMDE1IiwiY29kZSI6MTczMzIyNDA3NjgxOSwiZm9vIjoiNGJkMDI2ODk4In0sInNpZ25hdHVyZSI6IkFFMDUwMEY0NTY1MTU2OUUwQjJBNDlENjdGM0ZBQkI4In0=',
+        'x-mas': f'{xmas_value}',
     }
+    
+    return headers
+
+def headers_team_data(team_id, api_url):
+    xmas_value = create_xmas_header(api_url, xmas_pass)
+    headers = {
+        'accept': '*/*',
+        'accept-language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
+        'cache-control': 'no-cache',
+        'pragma': 'no-cache',
+        'priority': 'u=1, i',
+        'referer': f'https://www.fotmob.com/en-GB/teams/{team_id}/',
+        'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        'x-mas': f'{xmas_value}',
+    }
+    
+    return headers
+
+def headers_for_images():
+    headers = {
+        'accept': '*/*',
+        'accept-language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
+        'cache-control': 'no-cache',
+        'pragma': 'no-cache',
+        'priority': 'u=1, i',
+        'referer': f'https://www.fotmob.com/',
+        'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+        }
     
     return headers
     
 # API'den veri çekme
-url = "https://www.fotmob.com/api/leagueseasondeepstats?id=71&season=23864&type=players&stat=total_scoring_att&slug=super-lig"
-response = requests.get(url, headers=headers_total_shots())
+
+league_id = 71
+season_id = 23864
+
+leagueseasondeepstats_url = f"https://www.fotmob.com/api/leagueseasondeepstats?id={league_id}&season={season_id}&type=players&stat=total_scoring_att"
+response = requests.get(leagueseasondeepstats_url, headers=headers_total_shots(league_id, season_id))
 data = response.json()
 
 # Gerekli bilgileri işleme
@@ -243,13 +356,13 @@ secilen_oyuncu = next(oyuncu for oyuncu in oyuncular if oyuncu["player_name"] ==
 player_id = secilen_oyuncu["player_id"]
 team_id = secilen_oyuncu["team_id"]
 player_name = secilen_oyuncu["player_name"]
-league_id = 71
 league_string = "Süper Lig"
 season_string = "2024-2025"
 
 def get_team_data(team_id):
-    team_data_url = f"https://www.fotmob.com/api/teams?id={team_id}"
-    team_data_response = requests.get(team_data_url, headers=headers_player_data(player_id))
+    api_url = f"/api/teams?id={team_id}"
+    team_data_url = f"https://www.fotmob.com"+api_url
+    team_data_response = requests.get(team_data_url, headers=headers_team_data(team_id, api_url))
     team_data = team_data_response.json()
     return team_data
 
@@ -262,12 +375,11 @@ def get_entry_id_for_selected_player(player_id):
     """
     Seçilen oyuncunun 2024/2025 Süper Lig sezonuna ait entryId bilgisini döner.
     """
-    # Seçilen oyuncunun sezon bilgilerini API'den çekme
-    player_data_url = f"https://www.fotmob.com/api/playerData?id={player_id}"
-    player_data_response = requests.get(player_data_url, headers=headers_player_data(player_id))
+    api_url = f"/api/playerData?id={player_id}"
+    player_data_url = f"https://www.fotmob.com"+api_url
+    player_data_response = requests.get(player_data_url, headers=headers_player_data(player_id, api_url))
     player_data = player_data_response.json()
 
-    # 2024/2025 Süper Lig sezonuna ait entryId'yi bulma
     entry_id = None
     for season in player_data.get("statSeasons", []):
         if season["seasonName"] == "2024/2025":
@@ -277,15 +389,12 @@ def get_entry_id_for_selected_player(player_id):
                     break
     return entry_id
 
-# Seçilen oyuncunun 2024/2025 Süper Lig sezonu entryId'sini alma
 entry_id = get_entry_id_for_selected_player(player_id)
     
 def get_shotmap_data(player_id, entry_id):
-    """
-    Seçilen oyuncunun şut haritası verilerini API'den çeker.
-    """
-    shotmap_url = f"https://www.fotmob.com/api/playerStats?playerId={player_id}&seasonId={entry_id}"
-    shotmap_response = requests.get(shotmap_url, headers=headers_player_stats(player_id))
+    api_url = f"/api/playerStats?playerId={player_id}&seasonId={entry_id}"
+    shotmap_url = f"https://www.fotmob.com"+api_url
+    shotmap_response = requests.get(shotmap_url, headers=headers_player_stats(player_id, api_url))
     shotmap_data = shotmap_response.json()
     shotmap = shotmap_data.get("shotmap", [])
     if shotmap is not None: 
@@ -294,14 +403,11 @@ def get_shotmap_data(player_id, entry_id):
         return None
 
 def get_player_shooting_stats(player_id, season_id):
-    """
-    Seçilen oyuncunun sezon performansındaki 'Shooting' istatistiklerini API'den çeker.
-    """
-    url = f"https://www.fotmob.com/api/playerStats?playerId={player_id}&seasonId={season_id}"
-    response = requests.get(url, headers=headers_player_stats(player_id))
+    api_url = f"/api/playerStats?playerId={player_id}&seasonId={season_id}"
+    url = f"https://www.fotmob.com"+api_url
+    response = requests.get(url, headers=headers_player_stats(player_id, api_url))
     data = response.json()
     
-    # Stats section içerisindeki 'Shooting' başlığı altındaki verileri al
     stats_section = data.get("statsSection", {}).get("items", [])
     
     if not stats_section:
@@ -320,11 +426,9 @@ def get_player_shooting_stats(player_id, season_id):
     return shooting_stats
 
 def get_player_match_played_stats(player_id, season_id):
-    """
-    Seçilen oyuncunun sezon performansındaki 'Matches', 'Started', 'Minutes' istatistiklerini API'den çeker.
-    """
-    url = f"https://www.fotmob.com/api/playerStats?playerId={player_id}&seasonId={season_id}"
-    response = requests.get(url, headers=headers_player_stats(player_id))
+    api_url = f"/api/playerStats?playerId={player_id}&seasonId={season_id}"
+    url = f"https://www.fotmob.com"+api_url
+    response = requests.get(url, headers=headers_player_stats(player_id, api_url))
     data = response.json()
 
     # Stats section içerisindeki verileri al
@@ -352,7 +456,6 @@ minutes_played = player_match_stats["Minutes"]
 
 if shotmap_data is not None and player_shooting_stats is not None and player_match_stats is not None:
     # 'Goals' başlığını arayarak gol sayısını çekme
-    print(player_shooting_stats)
     goal_stat = next((item for item in player_shooting_stats if item["title"] == "Goals"), None)
     goal_count = goal_stat["statValue"] if goal_stat else '-'
 
@@ -418,8 +521,8 @@ if shotmap_data is not None and player_shooting_stats is not None and player_mat
             fontsize=9, fontproperties=prop, ha='left', va='bottom', color=primary_text_color, weight='normal', alpha=0.5)
                 
     # Oyuncu görselini URL'den çekme
-    url = f'https://images.fotmob.com/image_resources/playerimages/{player_id}.png'
-    response = requests.get(url, headers=headers_player_data(player_id))
+    player_img_url = f'https://images.fotmob.com/image_resources/playerimages/{player_id}.png'
+    response = requests.get(player_img_url, headers=headers_for_images())
     img = mpimg.imread(BytesIO(response.content))
 
     # Görseli ekleme
@@ -428,7 +531,7 @@ if shotmap_data is not None and player_shooting_stats is not None and player_mat
     ax_shotmap.add_artist(ab)
     
     url_teamlogo = f'https://images.fotmob.com/image_resources/logo/teamlogo/{team_id}.png'
-    response_teamlogo = requests.get(url_teamlogo, headers=headers_player_data(player_id))
+    response_teamlogo = requests.get(url_teamlogo, headers=headers_for_images())
     img_teamlogo = mpimg.imread(BytesIO(response_teamlogo.content))
 
     # Görseli ekleme
