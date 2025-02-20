@@ -457,8 +457,13 @@ minutes_played = player_match_stats["Minutes"]
 if shotmap_data is not None and player_shooting_stats is not None and player_match_stats is not None:
     # 'Goals' başlığını arayarak gol sayısını çekme
     goal_stat = next((item for item in player_shooting_stats if item["title"] == "Goals"), None)
-    goal_count = goal_stat["statValue"] if goal_stat else '-'
-
+    goal_count = goal_stat["statValue"] if goal_stat else 0
+    
+    penalty_goals_stat = next((item for item in player_shooting_stats if item["title"] == "Penalty goals"), None)
+    penalty_goals_count = penalty_goals_stat["statValue"] if penalty_goals_stat else 0
+    
+    goals_except_penalties_count = int(goal_count) - int(penalty_goals_count)
+    
     # 'Shots' başlığını arayarak şut sayısını çekme
     shots_stat = next((item for item in player_shooting_stats if item["title"] == "Shots"), None)
     shots_count = shots_stat["statValue"] if shots_stat else '-'
@@ -491,7 +496,6 @@ if shotmap_data is not None and player_shooting_stats is not None and player_mat
                 pitch.lines(shot['x'], shot['y'], 105, shot['goalCrossedY'], ax=ax_shotmap, color=to_rgba(shot_color, alpha=0.5), lw=1)
                 pitch.scatter(shot['x'], shot['y'], ax=ax_shotmap, c=shot_color, s=round(shot['expectedGoals'], 2)*800, edgecolors='black', marker='*', alpha=0.8, lw=0.5)
             if shot['eventType'] == 'AttemptSaved':
-                shot
                 shot_color = attemptSaved_color
                 if shot["isBlocked"] and (not shot.get("expectedGoalsOnTarget", 0)):
                     pitch.lines(shot['x'], shot['y'], shot['blockedX'], shot['blockedY'], ax=ax_shotmap, color=to_rgba(shot_color, alpha=0.5), lw=1)
@@ -549,18 +553,20 @@ if shotmap_data is not None and player_shooting_stats is not None and player_mat
     back_box_2 = dict(boxstyle='round, pad=0.4', facecolor='#facd5c', alpha=0.5)
 
     ax_info.text(0.08, 0.67, "Gol", size=12, ha="right", fontproperties=prop, color=primary_text_color)
-    ax_info.text(0.08, 0.60, "Toplam Şut", size=12, ha="right", fontproperties=prop, color=primary_text_color)
-    ax_info.text(0.08, 0.53, "İsabetli Şut", size=12, ha="right", fontproperties=prop, color=primary_text_color)
-    ax_info.text(0.08, 0.46, "Gol Beklentisi (xG)", size=12, ha="right", fontproperties=prop, color=primary_text_color)
-    ax_info.text(0.08, 0.39, "Penaltısız xG", size=12, ha="right", fontproperties=prop, color=primary_text_color)
-    ax_info.text(0.08, 0.32, "İsabetli Şutta xG", size=12, ha="right", fontproperties=prop, color=primary_text_color)
+    ax_info.text(0.08, 0.60, "Penaltısız Gol", size=12, ha="right", fontproperties=prop, color=primary_text_color)
+    ax_info.text(0.08, 0.53, "Toplam Şut", size=12, ha="right", fontproperties=prop, color=primary_text_color)
+    ax_info.text(0.08, 0.46, "İsabetli Şut", size=12, ha="right", fontproperties=prop, color=primary_text_color)
+    ax_info.text(0.08, 0.39, "Gol Beklentisi (xG)", size=12, ha="right", fontproperties=prop, color=primary_text_color)
+    ax_info.text(0.08, 0.32, "Penaltısız xG", size=12, ha="right", fontproperties=prop, color=primary_text_color)
+    ax_info.text(0.08, 0.25, "İsabetli Şutta xG", size=12, ha="right", fontproperties=prop, color=primary_text_color)
 
     ax_info.text(0.32, 0.671, str(goal_count), size=12, ha="center", fontproperties=prop, bbox=back_box_2, color='black')
-    ax_info.text(0.32, 0.601, str(shots_count), size=12, ha="center", fontproperties=prop, bbox=back_box_2, color='black')
-    ax_info.text(0.32, 0.531, str(shotsontarget_count), size=12, ha="center", fontproperties=prop, bbox=back_box_2, color='black')
-    ax_info.text(0.32, 0.461, str(xG_count), size=12, ha="center", fontproperties=prop, bbox=back_box_2, color='black')
-    ax_info.text(0.32, 0.391, str(xGnP_count), size=12, ha="center", fontproperties=prop, bbox=back_box_2, color='black')
-    ax_info.text(0.32, 0.321, str(xGOT_count), size=12, ha="center", fontproperties=prop, bbox=back_box_2, color='black')
+    ax_info.text(0.32, 0.601, str(goals_except_penalties_count), size=12, ha="center", fontproperties=prop, bbox=back_box_2, color='black')
+    ax_info.text(0.32, 0.531, str(shots_count), size=12, ha="center", fontproperties=prop, bbox=back_box_2, color='black')
+    ax_info.text(0.32, 0.461, str(shotsontarget_count), size=12, ha="center", fontproperties=prop, bbox=back_box_2, color='black')
+    ax_info.text(0.32, 0.391, str(xG_count), size=12, ha="center", fontproperties=prop, bbox=back_box_2, color='black')
+    ax_info.text(0.32, 0.321, str(xGnP_count), size=12, ha="center", fontproperties=prop, bbox=back_box_2, color='black')
+    ax_info.text(0.32, 0.251, str(xGOT_count), size=12, ha="center", fontproperties=prop, bbox=back_box_2, color='black')
 
     #ax_info.text(0.1, 0.22, f"{str(matches_played)} maç", size=12, ha="center", fontproperties=prop, color=primary_text_color)
     #ax_info.text(0.1, 0.17, f"{str(started_in_11)} ilk 11", size=12, ha="center", fontproperties=prop, color=primary_text_color)
@@ -574,7 +580,7 @@ if shotmap_data is not None and player_shooting_stats is not None and player_mat
             ["İlk 11", started_in_11],
             ["Dakika", minutes_played]]
     
-    bbox = Bbox([[-0.25, 0.1], [0.45, 0.225]])  # Sol alt köşe (0.05, 0.1), sağ üst köşe (0.3, 0.3)
+    bbox = Bbox([[-0.25, 0.065], [0.45, 0.19]])  # Sol alt köşe (0.05, 0.1), sağ üst köşe (0.3, 0.3)
     
     # Tabloyu dikdörtgenin içine yerleştirme
     table = ax_info.table(cellText=data, cellLoc='center', 
