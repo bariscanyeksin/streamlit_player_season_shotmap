@@ -491,6 +491,7 @@ if shotmap_data is not None and player_shooting_stats is not None and player_mat
                 pitch.lines(shot['x'], shot['y'], 105, shot['goalCrossedY'], ax=ax_shotmap, color=to_rgba(shot_color, alpha=0.5), lw=1)
                 pitch.scatter(shot['x'], shot['y'], ax=ax_shotmap, c=shot_color, s=round(shot['expectedGoals'], 2)*800, edgecolors='black', marker='*', alpha=0.8, lw=0.5)
             if shot['eventType'] == 'AttemptSaved':
+                shot
                 shot_color = attemptSaved_color
                 if shot["isBlocked"] and (not shot.get("expectedGoalsOnTarget", 0)):
                     pitch.lines(shot['x'], shot['y'], shot['blockedX'], shot['blockedY'], ax=ax_shotmap, color=to_rgba(shot_color, alpha=0.5), lw=1)
